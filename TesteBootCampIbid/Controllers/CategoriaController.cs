@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mime;
 using TesteBootCampIbid.Data;
 using TesteBootCampIbid.Models;
 
@@ -16,7 +17,7 @@ namespace TesteBootCampIbid.Controllers
                 var categorias = await context.Categorias.ToListAsync();
                 return Ok(categorias);
             }
-            catch (Exception ex)
+            catch
             {
                 return StatusCode(500, "Falha interna");
             }
@@ -39,21 +40,31 @@ namespace TesteBootCampIbid.Controllers
             }
         }
 
-        [HttpGet("categoria/{categoriaId}/protudos")]
-        public async Task<IActionResult> GetProductsByCategory(int categoriaId, [FromServices] AppDbContext context)
+        [HttpGet("categoria/{id:int}/produtos")]
+        public async Task<IActionResult> GetProductsByCategory(int id, [FromServices] AppDbContext context)
         {
             try
             {
+                var produtos = await context.Produtos.Where(x => x.ProdutoCategoriaId == id).ToListAsync();
 
-                var produtos = await context.Produtos.Where(x => x.ProdutoCategoriaId == categoriaId).ToListAsync();
-                if (produtos == null)
-                    return NotFound("Não encontrado");
+                if (produtos.Count == 0)
+                    return NotFound("Nenhum produto encontrado para esta categoria.");
+
                 return Ok(produtos);
             }
             catch
             {
                 return StatusCode(500, "Falha interna");
             }
+        }
+
+
+        [HttpPost("categorias")]
+        public async Task<IActionResult> PostAsync([FromBody] Categoria categoria, [FromServices] AppDbContext context)
+        {
+            context.Categorias.Add(categoria);
+            context.SaveChanges();
+            return Created($"{categoria.Id}", categoria);
         }
 
         [HttpPut("categoria/{id:int}")]

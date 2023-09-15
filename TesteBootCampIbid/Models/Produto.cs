@@ -6,6 +6,6 @@
         public string? Nome { get; set; }
         public string? Descricao { get; set; }
         public int ProdutoCategoriaId { get; set; }
-        public Categoria Categoria { get; set; }
+        public Categoria? Categoria { get; set; }
     }
 }
